@@ -1,0 +1,28 @@
+
+
+# 📘 Projetos Progressivos: Engenharia de Dados, Finanças e Modelagem de Domínio
+
+Este guia prático detalha os projetos progressivos desenhados para consolidar os conceitos de **Database Internals**, **Performance**, **Cloud Hardening** e **Modelagem de Domínio (DDD)** aplicados ao cenário financeiro de alta criticidade.
+
+---
+
+## 🛠️ Projeto A: Arquitetura SaaS Multi-tenant FinTech
+
+### 1. Visão Geral e Fronteiras do Domínio
+O objetivo deste projeto é desenhar a camada de persistência para uma plataforma SaaS financeira multi-unidades. O sistema gerencia transações, faturamento e limites de crédito onde múltiplas filiais ou unidades de negócio compartilham a mesma infraestrutura, mas exigem isolamento absoluto de dados.
+
+* **Contexto Delimitado (Bounded Context):** Gerenciamento de Tenant/Unidade, Controle de Acesso e Billing.
+* **Core Business Invariant:** Nenhuma unidade (Tenant B) pode ter visibilidade ou modificar dados de outra unidade (Tenant A), sob nenhuma circunstância.
+* **O Desafio Sênior:** Avaliar o trade-off de isolamento físico vs. lógico e mitigar o problema do *Noisy Neighbor* (uma unidade consumindo todos os recursos de I/O do banco).
+
+---
+
+### 2. Estratégias de Arquitetura de Dados
+
+#### Abordagem 1: Schema-per-Tenant (Isolamento por Schema)
+Cada unidade de negócio possui o seu próprio conjunto de tabelas dentro de um namespace isolado (`tenant_a.movimentacao`, `tenant_b.movimentacao`).
+* **Vantagens:** Facilidade para restaurar o backup de apenas um cliente específico; tabelas menores e índices mais compactos.
+* **Desvantagens:** Overhead massivo de memória no PostgreSQL (Buffer Pool fragmentado por milhares de tabelas iguais); manutenção de migrações de banco (DDL) complexa.
+
+#### Abordagem 2: Shared Schema com Row Level Security (RLS)
+Todas as unidades compartilham as mesmas tabelas físicas. O isolamento é garantido em nível de linha pelo próprio motor do banco através de políticas de segurança.
