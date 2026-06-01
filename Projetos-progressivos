@@ -1,5 +1,3 @@
-
-
 # 📘 Projetos Progressivos: Engenharia de Dados, Finanças e Modelagem de Domínio
 
 Este guia prático detalha os projetos progressivos desenhados para consolidar os conceitos de **Database Internals**, **Performance**, **Cloud Hardening** e **Modelagem de Domínio (DDD)** aplicados ao cenário financeiro de alta criticidade.
@@ -26,3 +24,11 @@ Cada unidade de negócio possui o seu próprio conjunto de tabelas dentro de um 
 
 #### Abordagem 2: Shared Schema com Row Level Security (RLS)
 Todas as unidades compartilham as mesmas tabelas físicas. O isolamento é garantido em nível de linha pelo próprio motor do banco através de políticas de segurança.
+
+```sql
+-- Ativando o RLS na tabela de transações
+ALTER TABLE transacao ENABLE ROW LEVEL SECURITY;
+
+-- Criando a política de isolamento baseado na variável de sessão atual
+CREATE POLICY tenant_isolation_policy ON transacao
+    USING (unidade_id = current_setting('app.current_unidade_id', true));
