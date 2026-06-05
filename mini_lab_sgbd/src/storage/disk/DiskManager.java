@@ -1,4 +1,4 @@
-package storage;
+package storage.disk;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,7 +20,6 @@ public class DiskManager {
 	}
 	
 	public ByteBuffer readPage(int pageId) throws FileNotFoundException, IOException {
-		
 		ByteBuffer buffer = ByteBuffer.allocate(PAGE_SIZE);
 		
 		try {
@@ -41,8 +40,10 @@ public class DiskManager {
 			buffer.flip();
 			return buffer;
 		} catch (IOException e) {
+			System.err.println(e.getMessage());
 	        System.err.println("ERRO CRÍTICO I/O: Falha ao ler a página " + pageId);
 	        throw e; // Lança para frente, pois o Buffer Pool precisa saber que o dado falhou
+	        
 	    }
 	}
 	
@@ -59,8 +60,11 @@ public class DiskManager {
 			}
 			
 			channel.force(true);
-			
+			System.out.println("persistido com sucesso");
+
 			return true;
+			
+			
 			
 		} catch (IOException e) {
 			System.err.println("ERRO CRÍTICO DE I/O ao escrever a página " + pageId + ": " + e.getMessage());
@@ -68,6 +72,7 @@ public class DiskManager {
             
             return false; // Avisa a camada de cima que a escrita falhou!
 		}
+		
 	}
 	
 	public void close() {
@@ -78,5 +83,9 @@ public class DiskManager {
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public long getChannelSize() throws IOException {
+		return channel.size();
 	}
 }
