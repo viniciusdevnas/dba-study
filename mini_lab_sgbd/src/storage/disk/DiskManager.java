@@ -23,16 +23,25 @@ public class DiskManager {
 		ByteBuffer buffer = ByteBuffer.allocate(PAGE_SIZE);
 		
 		try {
+			// --- AJUSTE GEMINI: DEFESA PARA ARQUIVO NOVO / PARADOXO DO BOOT ---
+			// Se o canal acabou de ser criado (0 bytes) e pedirem a página 0,
+			// retornamos o buffer limpo de 4KB para o CatalogManager estruturar a RAM.
+			if (channel.size() == 0 && pageId == 0) {
+				buffer.position(0);
+				return buffer;
+			}
+			// ------------------------------------------------------------------
+
 			long offset = (long) pageId * PAGE_SIZE;
 			
-			if(offset > channel.size()) {
-				throw new IOException("A página " + pageId + "não existe");
+			if (offset > channel.size()) {
+				throw new IOException("A página " + pageId + " não existe");
 			}
 			
 			channel.position(offset);
-			while(buffer.hasRemaining()) {
+			while (buffer.hasRemaining()) {
 				int bytesRead = channel.read(buffer);
-				if(bytesRead == -1) {
+				if (bytesRead == -1) {
 					throw new IOException("Fim de arquivo inesperado ao ler a página: " + pageId);
 				}
 			}
@@ -42,8 +51,7 @@ public class DiskManager {
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 	        System.err.println("ERRO CRÍTICO I/O: Falha ao ler a página " + pageId);
-	        throw e; // Lança para frente, pois o Buffer Pool precisa saber que o dado falhou
-	        
+	        throw e; // Lança para o Buffer Pool tratar a falha
 	    }
 	}
 	

@@ -129,7 +129,13 @@ public class Page {
     }
     
     public byte[] getPageByte() {
-        return this.data;
+    	byte[] pageCopy = new byte[this.data.length];
+        
+        // Copia os dados do array interno para a cópia de forma ultra rápida
+        System.arraycopy(this.data, 0, pageCopy, 0, this.data.length);
+        
+        // Retorna a cópia segura! O DiskManager pode gravar em paz
+        return pageCopy;
     }
     
     public void deleteRecord(int slotNumber) {
@@ -179,5 +185,9 @@ public class Page {
         // Atualiza as variáveis locais da RAM pós-compactação
         this.slotCount = activeSlotCount;
         this.freeSpacePointer = currentSpaceFree;
+    }
+    
+    public int getNumslots() {
+    	return slotCount;
     }
 }
